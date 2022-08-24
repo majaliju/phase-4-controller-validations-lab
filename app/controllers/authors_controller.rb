@@ -1,4 +1,5 @@
 class AuthorsController < ApplicationController
+rescue_from ActiveRecord::RecordInvalid, with: :render_invalidation
   
   def show
     author = Author.find(params[:id])
@@ -8,8 +9,9 @@ class AuthorsController < ApplicationController
 
   def create
     author = Author.create(author_params)
-
     render json: author, status: :created
+  # rescue ActiveRecord::RecordInvalid => invalid
+  #   render json: {errors: invalid.record.errors}, status: :unprocessable_entity
   end
 
   private
@@ -17,5 +19,11 @@ class AuthorsController < ApplicationController
   def author_params
     params.permit(:email, :name)
   end
+
+  private
+  def render_invalidation(invalid)
+    render json: {errors: invalid.record.errors}, status: :unprocessable_entity
+  end
   
+
 end
